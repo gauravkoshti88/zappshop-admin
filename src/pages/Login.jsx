@@ -25,8 +25,6 @@ const Login = () => {
 
       getAdminData()
       navigate('/')
-      
-      console.log(data, 'Login Successfully ✅');
       toast.success(`${data.message}`, {
         position: "top-right",
         autoClose: 3000,
@@ -39,8 +37,7 @@ const Login = () => {
         transition: Bounce,
       });
     } catch (error) {
-      console.log(error);
-      toast.error('Server Error ⚠️', {
+      toast.error(`${error.response.data.message} ⚠️`, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
