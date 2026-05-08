@@ -266,7 +266,6 @@ const AddProduct = () => {
                 Add Product
               </>
             )}
-            <div className='absolute inset-0 bg-gradient-to-r from-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700' />
           </button>
         </form>
       </div>
