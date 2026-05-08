@@ -22,6 +22,9 @@ const AddProduct = () => {
   let { serverUrl } = useContext(authDataContext);
   let [loading, setLoading] = useState(false);
 
+  console.log(bestSeller);
+
+
   // Get image preview URL safely
   const getImagePreview = (imageFile) => {
     return imageFile ? URL.createObjectURL(imageFile) : Upload;
@@ -37,7 +40,7 @@ const AddProduct = () => {
       formData.append("price", price)
       formData.append("category", category)
       formData.append("subCategory", subCategory)
-      formData.append("bestSeller", bestSeller)
+      formData.append("bestseller", JSON.stringify(bestSeller))
       formData.append("sizes", JSON.stringify(sizes))
       formData.append("image1", image1)
       formData.append("image2", image2)
@@ -47,17 +50,19 @@ const AddProduct = () => {
       let result = await axios.post(serverUrl + "/product/addproduct", formData, { withCredentials: true })
 
       // Reset form
-      setName("")
-      setDescription("")
-      setImage1(null)
-      setImage2(null)
-      setImage3(null)
-      setImage4(null)
-      setPrice("")
-      setBestSeller(false)
-      setCategory("Men")
-      setSubCategory("TopWear")
-      setSizes([])
+      if (result.data) {
+        setName("")
+        setDescription("")
+        setImage1(null)
+        setImage2(null)
+        setImage3(null)
+        setImage4(null)
+        setPrice("")
+        setBestSeller(false)
+        setCategory("Men")
+        setSubCategory("TopWear")
+        setSizes([])
+      }
 
       toast.success('Product Added Successfully! ✅', {
         position: "top-right",
@@ -203,8 +208,8 @@ const AddProduct = () => {
                       key={size}
                       type='button'
                       className={`px-6 py-3 rounded-2xl text-lg font-semibold border-2 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${sizes.includes(size)
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-emerald-400 shadow-emerald-500/25 hover:shadow-emerald-400/50'
-                          : 'bg-slate-700/60 border-slate-600 hover:border-[#2c7b89]/60 hover:bg-slate-700 text-white shadow-slate-500/25'
+                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-emerald-400 shadow-emerald-500/25 hover:shadow-emerald-400/50'
+                        : 'bg-slate-700/60 border-slate-600 hover:border-[#2c7b89]/60 hover:bg-slate-700 text-white shadow-slate-500/25'
                         }`}
                       onClick={() => setSizes(prev =>
                         prev.includes(size)
@@ -222,10 +227,11 @@ const AddProduct = () => {
 
           {/* Best Seller Checkbox - FIXED */}
           <div className='flex items-center gap-4 pt-4 border-t border-slate-700/50'>
-            <label htmlFor="bestSellerCheckbox" className='flex items-center gap-3 cursor-pointer group'>
+            <label htmlFor="bestseller" className='flex items-center gap-3 cursor-pointer group'>
               <input
                 type="checkbox"
-                id="bestSellerCheckbox"
+                id="bestseller"
+                name='bestseller'
                 className='sr-only peer'
                 checked={bestSeller}
                 onChange={(e) => setBestSeller(e.target.checked)}
