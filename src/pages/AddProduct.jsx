@@ -93,8 +93,8 @@ const AddProduct = () => {
       <Navbar />
       <Sidebar />
 
-      <div className='w-[82%] h-full flex items-start justify-center absolute right-0 top-20 p-8'>
-        <form className='w-full max-w-4xl bg-gradient-to-b from-slate-800/90 to-slate-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-12 gap-8 flex flex-col' onSubmit={handleAddProduct}>
+      <div className='w-full lg:w-[82%] h-full flex items-start justify-center lg:absolute lg:right-0 lg:top-5 p-8 mt-15 lg-mt-0 mb-15'>
+        <form className='w-full max-w-4xl bg-gradient-to-b from-slate-800/90 to-slate-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-8 gap-5 flex flex-col' onSubmit={handleAddProduct}>
 
           {/* Header */}
           <div className='text-center'>
@@ -107,16 +107,19 @@ const AddProduct = () => {
           {/* Image Upload */}
           <div className='space-y-4'>
             <label className='block text-2xl font-bold text-white drop-shadow-lg'>📸 Product Images</label>
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6'>
               {imageStates.map((image, index) => (
-                <label key={index} className='group relative cursor-pointer block p-2 rounded-2xl bg-slate-700/50 backdrop-blur-sm border-2 border-slate-600 hover:border-[#2c7b89]/60 hover:bg-slate-700/70 hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95'>
+                <label
+                  key={index}
+                  className='group relative cursor-pointer block p-2 rounded-2xl bg-slate-700/50 backdrop-blur-sm border-2 border-slate-600 hover:border-[#2c7b89]/60 hover:bg-slate-700/70 hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95'
+                >
                   <input
                     type="file"
                     hidden
                     accept="image/*"
                     onChange={(e) => imageSetters[index](e.target.files[0])}
                   />
-                  <div className='w-32 h-32 md:w-40 md:h-40 flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 overflow-hidden shadow-xl group-hover:shadow-2xl transition-all duration-300'>
+                  <div className='w-20.5 h-20.5 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-42.5 lg:h-42.5 flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 overflow-hidden shadow-xl group-hover:shadow-2xl transition-all duration-300'>
                     <img
                       src={getImagePreview(image)}
                       alt={`Preview ${index + 1}`}

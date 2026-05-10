@@ -30,18 +30,40 @@ const Orders = () => {
 
   const statusHandler = async (e, orderId) => {
     try {
-      await axios.post(serverUrl + "/order/updatestatus", { orderId, status: e.target.value }, { withCredentials: true })
+      const result = await axios.post(
+        serverUrl + "/order/updatestatus",
+        { orderId, status: e.target.value },
+        { withCredentials: true }
+      );
+
       toast.success('Status Updated Successfully! ✅', {
         position: "top-right",
         autoClose: 3000,
         theme: "dark",
         transition: Bounce,
       });
-      await allOrders()
+
+      // ✅ Turant local state update
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order._id === orderId
+            ? {
+              ...order,
+              status: e.target.value,
+              payment: e.target.value === "Delivered" ? true : order.payment,
+              paymentMethod: result.data.paymentMethod || order.paymentMethod
+            }
+            : order
+        )
+      );
+      allOrders()
     } catch (error) {
       toast.error("Status Update Failed! ❌");
     }
-  }
+  };
+
+  console.log(orders);
+
 
   useEffect(() => {
     allOrders()
@@ -50,7 +72,7 @@ const Orders = () => {
   const getStatusColor = (status) => {
     const colors = {
       "Order Placed": "from-orange-500 to-orange-600",
-      "Packing": "from-blue-500 to-blue-600", 
+      "Packing": "from-blue-500 to-blue-600",
       "Shipped": "from-purple-500 to-purple-600",
       "Out for delivery": "from-yellow-500 to-yellow-600",
       "Delivered": "from-emerald-500 to-emerald-600"
@@ -66,12 +88,11 @@ const Orders = () => {
         <SideBar className="w-full lg:w-[18%]" />
 
         {/* Orders Section */}
-        <div className={`w-full flex flex-col items-center gap-6 pt-20 px-4 lg:pl-[20%] lg:pr-8 transition-all duration-300 ${
-          loading ? 'blur-sm' : ''
-        }`}>
-          
+        <div className={`w-full flex flex-col items-center gap-6 pt-20 px-4 lg:pl-[20%] lg:pr-8 transition-all duration-300 pb-20 sm:pb-10 ${loading ? 'blur-sm' : ''
+          }`}>
+
           {/* Header */}
-          <div className='w-full max-w-7xl flex flex-col items-center gap-3 mb-8'>
+          <div className='w-full max-w-7xl flex flex-col items-center gap-3 mb-2'>
             <h1 className='text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-white via-[#2c7b89] to-blue-400 bg-clip-text text-transparent drop-shadow-2xl text-center'>
               Orders Management
             </h1>
@@ -97,10 +118,23 @@ const Orders = () => {
                   <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 rounded-3xl blur-sm pointer-events-none' />
 
                   <div className='relative z-10 grid grid-cols-1 lg:grid-cols-5 items-start lg:items-center gap-4 lg:gap-6'>
-                    
-                    {/* Icon */}
-                    <div className='w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-white/20 to-slate-200/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-3xl group-hover:rotate-6 transition-all duration-500 flex-shrink-0'>
-                      <SiEbox className='w-8 h-8 lg:w-10 lg:h-10 text-slate-200 drop-shadow-lg' />
+
+                    <div className='flex flex-wrap gap-2 lg:gap-3'>
+                      {order.items.map((item, i) => (
+                        <div
+                          key={i}
+                          className='w-20 h-25 lg:w-20 lg:h-25 bg-gradient-to-br from-white/20 to-slate-200/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-3xl transition-all duration-500 overflow-hidden'
+                        >
+                          <img
+                            src={item?.image1?.url}
+                            alt={item.name || "Product"}
+                            className='w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500'
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/64x64/4a5568/9ca3af?text=?';
+                            }}
+                          />
+                        </div>
+                      ))}
                     </div>
 
                     {/* Items */}
@@ -126,9 +160,17 @@ const Orders = () => {
                     <div className='text-xs lg:text-sm text-slate-400 space-y-1 lg:col-span-1 flex-shrink-0'>
                       <div className='flex items-center gap-2 mb-1'>
                         <span className='px-2 py-1 bg-slate-700/60 backdrop-blur-sm rounded-xl text-xs'>Items: {order.items.length}</span>
-                        <span className={`px-2 py-1 bg-gradient-to-r ${order.payment ? 'from-emerald-500/80 to-emerald-600/80 text-emerald-900' : 'from-red-500/80 to-red-600/80 text-red-900'} rounded-xl text-xs font-medium shadow-lg`}>
-                          {order.payment ? '✅ Paid' : '⏳ Pending'}
+                        <span
+                          className={`px-2 py-1 bg-gradient-to-r ${order.payment
+                            ? 'from-emerald-500/80 to-emerald-600/80 text-emerald-900'
+                            : 'from-red-500/80 to-red-600/80 text-red-900'
+                            } rounded-xl text-xs font-medium`}
+                        >
+                          {order.payment
+                            ? `✅ Paid (${order.paymentMethod || ''})`
+                            : '⏳ Pending'}
                         </span>
+
                       </div>
                       <p className='text-xs opacity-75'>{new Date(order.date).toLocaleDateString('en-IN')}</p>
                       <p className='text-2xl lg:text-3xl font-black bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-2xl'>
@@ -141,6 +183,7 @@ const Orders = () => {
                       <span className='text-md text-slate-400 font-medium hidden lg:block whitespace-nowrap'>Status:</span>
                       <select
                         value={order.status}
+                        disabled={order.status == "Delivered"}
                         className={`px-2 py-2 lg:py-2 bg-gradient-to-r ${getStatusColor(order.status)} text-white font-semibold rounded-2xl border-2 border-white/30 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:scale-105 active:scale-98 transition-all duration-300 text-sm lg:text-base capitalize tracking-wide`}
                         onChange={(e) => statusHandler(e, order._id)}
                       >
@@ -154,8 +197,8 @@ const Orders = () => {
                   </div>
                 </div>
               ))
-            }
-          </div>
+              }
+            </div>
           ) : (
             <div className='w-full max-w-2xl flex flex-col items-center justify-center py-24 gap-6 text-center bg-slate-800/50 backdrop-blur-xl rounded-3xl border-2 border-slate-700/50 shadow-2xl'>
               <div className='w-24 h-24 bg-gradient-to-br from-slate-700 to-slate-800 rounded-3xl flex items-center justify-center shadow-2xl'>
@@ -172,7 +215,7 @@ const Orders = () => {
         </div>
       </div>
 
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={4000}
         theme="dark"
